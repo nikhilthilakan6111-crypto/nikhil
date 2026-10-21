@@ -3370,6 +3370,7 @@ const CONFIG = {
   facebookUrl: "https://facebook.com/nailyourgoal",
   instagramUrl: "https://instagram.com/nailyourgoal",
   whatsappNumber: "918590820175",
+  googleSheetUrl: "https://script.google.com/macros/s/AKfycbySzxqe3KrhYDl5VGxmI7vb2BPq9LH68p8-MJYRZlREvgEaUDzJfv6ZdS7T1NMZc6im/exec",
   workshopDate: "2026-10-31T09:00:00+05:30", // Saturday, Oct 31, 2026 9:00 AM IST
   workshopPrice: "₹1,200",
   originalPrice: "₹3,500",
@@ -3510,6 +3511,27 @@ function initLeadFormAndPriceReveal() {
     document.body.style.overflow = 'hidden';
 
     // Log lead submission to console (Ready for Meta Pixel / CAPI tracking)
+    // Automatically sync lead to Google Sheet in real-time
+    if (CONFIG.googleSheetUrl) {
+      try {
+        fetch(CONFIG.googleSheetUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: fullName,
+            phone: phone,
+            email: email || 'Not provided',
+            status: status,
+            city: city,
+            submittedAt: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+          })
+        }).catch(function(err) { console.log('Sheet sync:', err); });
+      } catch (err) {
+        console.log('Sheet error:', err);
+      }
+    }
+
     console.log("Meta Lead Generated:", { fullName, phone, email, status, city, fee: CONFIG.workshopPrice });
     if (typeof fbq === 'function') {
       fbq('track', 'Lead', {
