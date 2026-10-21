@@ -3370,7 +3370,7 @@ const CONFIG = {
   facebookUrl: "https://facebook.com/nailyourgoal",
   instagramUrl: "https://instagram.com/nailyourgoal",
   whatsappNumber: "918590820175",
-  googleSheetUrl: "https://script.google.com/macros/s/AKfycbySzxqe3KrhYDl5VGxmI7vb2BPq9LH68p8-MJYRZlREvgEaUDzJfv6ZdS7T1NMZc6im/exec",
+  googleSheetUrl: "https://script.google.com/macros/s/AKfycbz4K2gxQ7haDmqdAvbJ2QiDTOe33iMxKD9RRK1ruQPzj3IfKdGzYadl5LUt7ioq2fz0/exec",
   workshopDate: "2026-10-31T09:00:00+05:30", // Saturday, Oct 31, 2026 9:00 AM IST
   workshopPrice: "₹1,200",
   originalPrice: "₹3,500",
@@ -3514,18 +3514,23 @@ function initLeadFormAndPriceReveal() {
     // Automatically sync lead to Google Sheet in real-time
     if (CONFIG.googleSheetUrl) {
       try {
-        fetch(CONFIG.googleSheetUrl, {
+        const params = new URLSearchParams();
+        params.append('name', fullName);
+        params.append('phone', phone);
+        params.append('email', email || 'Not provided');
+        params.append('status', status);
+        params.append('city', city);
+        params.append('submittedAt', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+
+        const syncUrl = CONFIG.googleSheetUrl + (CONFIG.googleSheetUrl.includes('?') ? '&' : '?') + params.toString();
+
+        fetch(syncUrl, {
           method: 'POST',
           mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: fullName,
-            phone: phone,
-            email: email || 'Not provided',
-            status: status,
-            city: city,
-            submittedAt: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-          })
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: params.toString()
         }).catch(function(err) { console.log('Sheet sync:', err); });
       } catch (err) {
         console.log('Sheet error:', err);
